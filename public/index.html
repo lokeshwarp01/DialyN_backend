@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>DialyN Backend</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        color: #333;
+      }
+      h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+      }
+      .container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-top: 2rem;
+      }
+      .endpoint {
+        background: white;
+        padding: 1rem;
+        border-radius: 4px;
+        margin: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      code {
+        background: #f1f3f5;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: 'Courier New', Courier, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DialyN Backend API</h1>
+    <p>This is the backend server for DialyN, a news aggregation platform.</p>
+    
+    <div class="container">
+      <h2>API Endpoints</h2>
+      
+      <div class="endpoint">
+        <h3>Authentication</h3>
+        <p><strong>POST</strong> <code>/api/auth/register</code> - Register a new user</p>
+        <p><strong>POST</strong> <code>/api/auth/login</code> - Login user</p>
+      </div>
+      
+      <div class="endpoint">
+        <h3>News</h3>
+        <p><strong>GET</strong> <code>/api/news</code> - Get all news</p>
+        <p><strong>GET</strong> <code>/api/news/:id</code> - Get a single news item</p>
+      </div>
+      
+      <div class="endpoint">
+        <h3>Admin</h3>
+        <p><strong>POST</strong> <code>/api/admin/news</code> - Create news (Admin only)</p>
+        <p><strong>PUT</strong> <code>/api/admin/news/:id</code> - Update news (Admin only)</p>
+        <p><strong>DELETE</strong> <code>/api/admin/news/:id</code> - Delete news (Admin only)</p>
+      </div>
+    </div>
+    
+    <footer style="margin-top: 3rem; text-align: center; color: #666;">
+      <p>© 2025 DialyN. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

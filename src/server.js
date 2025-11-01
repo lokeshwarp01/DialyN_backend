@@ -2,13 +2,13 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const serverless = require('serverless-http');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/user');
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));
@@ -107,18 +107,17 @@ const gracefulShutdown = async () => {
 
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
-process.on('unhandledRejection', (err) => console.error('Unhandled Rejection:', err));
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-    if (process.env.NODE_ENV === 'production') process.exit(1);
-});
-
-// Start server
 const startServer = async () => {
-    await connectDB();
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-    });
+    try {
+        await connectDB();
+        console.log('Connected to database');
+    } catch (error) {
+        console.error('Failed to connect to database:', error);
+        process.exit(1);
+    }
 };
 
 startServer();
+
+// Export the Express app wrapped in the serverless-http handler
+module.exports = { app, handler: serverless(app) };

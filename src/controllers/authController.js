@@ -80,7 +80,7 @@ exports.loginUser = async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
         const token = createToken(user._id, 'user');
-        res.json({ user: { id: user._id, name: user.name, email: user.email }, token });
+        res.json({ user: { id: user._id, name: user.name, email: user.email, profile: user.profile }, token });
     } catch (err) {
         console.error('loginUser', err.message);
         res.status(500).json({ message: 'Server error', error: err.message });

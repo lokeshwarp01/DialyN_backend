@@ -7,8 +7,33 @@ const UserSchema = new mongoose.Schema(
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
+        profile: {
+            bio: { type: String, default: '' },
+            avatar: {
+                url: { type: String, default: '' },
+                public_id: { type: String, default: '' }
+            },
+            location: { type: String, default: '' },
+            website: { type: String, default: '' }
+        },
+        preferences: {
+            subscribeToNewsletter: { type: Boolean, default: false },
+            emailNotifications: { type: Boolean, default: true },
+            topics: [{ type: String }]  // For topic-based subscriptions
+        },
+        lastLogin: { type: Date },
+        isVerified: { type: Boolean, default: false }
     },
-    { timestamps: true }
+    { 
+        timestamps: true,
+        toJSON: {
+            transform: function(doc, ret) {
+                delete ret.password;
+                delete ret.__v;
+                return ret;
+            }
+        }
+    }
 );
 
 // Hash password before saving

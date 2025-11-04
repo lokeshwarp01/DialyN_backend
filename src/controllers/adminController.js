@@ -53,23 +53,20 @@ exports.createNews = async (req, res) => {
         if (req.admin) newsData.author = req.admin._id || undefined;
 
         const news = await News.create(newsData);
-        
+
         // Notify subscribers in the background
         const { notifySubscribers } = require('../utils/emailService');
         const User = require('../models/User');
-        
+
         // Get subscribers interested in this topic
         const topicSubscribers = await User.find({
             'preferences.subscribeToNewsletter': true,
             'preferences.emailNotifications': true,
-            'preferences.topics': topic
-        }).select('email');
-        
-        // Notify all subscribers (including topic-specific ones)
-        notifySubscribers(news, topicSubscribers)
-            .then(({ notified }) => console.log(`Notified ${notified} subscribers about new article`))
-            .catch(err => console.error('Error notifying subscribers:', err));
-            
+            'preferences.topics': { $in: topic }
+        }).select('email name');
+
+        await notifySubscribers(news, topicSubscribers);
+
         res.status(201).json({ message: 'News created', news });
     } catch (err) {
         console.error('createNews', err.message);

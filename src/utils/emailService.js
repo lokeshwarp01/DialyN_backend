@@ -38,27 +38,22 @@ const sendEmail = async ({ to, subject, text, html }) => {
 };
 
 // Function to notify subscribers about new news article
-const notifySubscribers = async (news, topicSubscribers = []) => {
+const notifySubscribers = async (news, subscribers = []) => {
     try {
-        // Get all users who are subscribed to the newsletter
-        const users = await User.find({
-            'preferences.subscribeToNewsletter': true,
-            'preferences.emailNotifications': true,
-            ...(topicSubscribers.length > 0 && { 'preferences.topics': { $in: [news.topic] } })
-        });
+        if (subscribers.length === 0) return { notified: 0 };
 
-        if (users.length === 0) return { notified: 0 };
+        console.log(`Notifying ${subscribers.length} subscribers about new article in topic: ${news.topic}`);
 
         const results = await Promise.allSettled(
-            users.map(user => 
+            subscribers.map(user =>
                 sendEmail({
                     to: user.email,
                     subject: `New Article: ${news.title}`,
-                    text: `Hi ${user.name},\n\nA new article has been published in ${news.topic}:\n\n${news.title}\n\n${news.content.substring(0, 200)}...\n\nRead more on our website!\n\nBest regards,\nThe News Team`,
+                    text: `Hi ${user.name || 'Subscriber'},\n\nA new article has been published in ${news.topic}:\n\n${news.title}\n\n${news.content.substring(0, 200)}...\n\nRead more on our website!\n\nBest regards,\nThe News Team`,
                     html: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                             <h2>New Article: ${news.title}</h2>
-                            <p>Hi ${user.name},</p>
+                            <p>Hi ${user.name || 'Subscriber'},</p>
                             <p>A new article has been published in <strong>${news.topic}</strong>:</p>
                             <h3>${news.title}</h3>
                             <p>${news.content.substring(0, 200)}...</p>
@@ -75,7 +70,7 @@ const notifySubscribers = async (news, topicSubscribers = []) => {
 
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.length - successful;
-        
+
         console.log(`Sent ${successful} notifications, ${failed} failed`);
         return { notified: successful, failed };
     } catch (error) {
@@ -83,6 +78,7 @@ const notifySubscribers = async (news, topicSubscribers = []) => {
         throw new Error('Failed to notify subscribers');
     }
 };
+
 
 module.exports = {
     sendEmail,

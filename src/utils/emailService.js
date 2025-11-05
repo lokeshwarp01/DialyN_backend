@@ -7,20 +7,20 @@ let transporter = null;
 // ---------------------------
 // PRIORITY 1: Gmail (App Password Auth)
 // ---------------------------
-try {
-    if (process.env.SMTP_USER && process.env.SMTP_USER.endsWith('@gmail.com')) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASSWORD, // Gmail App Password
-            },
-        });
-        console.log('Using Gmail transporter (primary)');
-    }
-} catch (err) {
-    console.warn('Gmail transporter failed to initialize:', err.message);
-}
+// try {
+//     if (process.env.SMTP_USER && process.env.SMTP_USER.endsWith('@gmail.com')) {
+//         transporter = nodemailer.createTransport({
+//             service: 'gmail',
+//             auth: {
+//                 user: process.env.SMTP_USER,
+//                 pass: process.env.SMTP_PASSWORD, // Gmail App Password
+//             },
+//         });
+//         console.log('Using Gmail transporter (primary)');
+//     }
+// } catch (err) {
+//     console.warn('Gmail transporter failed to initialize:', err.message);
+// }
 
 // ---------------------------
 // PRIORITY 2: SendGrid fallback

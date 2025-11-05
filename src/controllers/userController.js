@@ -19,7 +19,9 @@ function base64ToBuffer(data) {
     }
 }
 
-// Get user profile
+// ---------------------------
+// GET USER PROFILE
+// ---------------------------
 exports.getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
@@ -31,12 +33,14 @@ exports.getProfile = async (req, res) => {
     }
 };
 
-// Update user profile
+// ---------------------------
+// UPDATE USER PROFILE
+// ---------------------------
 exports.updateProfile = async (req, res) => {
     try {
         const { name, bio, location, website, avatar } = req.body;
         const updates = {};
-        
+
         if (name) updates.name = name;
         if (bio !== undefined) updates['profile.bio'] = bio;
         if (location !== undefined) updates['profile.location'] = location;
@@ -46,8 +50,7 @@ exports.updateProfile = async (req, res) => {
         if (avatar) {
             const { uploadBuffer } = require('../utils/cloudinaryUpload');
             const cloudinary = require('../config/cloudinary');
-            
-            // If user already has an avatar, delete the old one from Cloudinary
+
             const user = await User.findById(req.user.id);
             if (user.profile.avatar && user.profile.avatar.public_id) {
                 try {
@@ -57,10 +60,9 @@ exports.updateProfile = async (req, res) => {
                 }
             }
 
-            // Upload new avatar
             const buf = base64ToBuffer(avatar);
             if (!buf) return res.status(400).json({ message: 'Invalid base64 image' });
-            
+
             const result = await uploadBuffer(buf, 'user-avatars');
             updates['profile.avatar'] = {
                 url: result.secure_url,
@@ -82,12 +84,14 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// Update user preferences
+// ---------------------------
+// UPDATE USER PREFERENCES
+// ---------------------------
 exports.updatePreferences = async (req, res) => {
     try {
         const { subscribeToNewsletter, emailNotifications, topics } = req.body;
         const updates = {};
-        
+
         if (subscribeToNewsletter !== undefined) updates['preferences.subscribeToNewsletter'] = subscribeToNewsletter;
         if (emailNotifications !== undefined) updates['preferences.emailNotifications'] = emailNotifications;
         if (topics !== undefined) updates['preferences.topics'] = topics;
@@ -106,27 +110,38 @@ exports.updatePreferences = async (req, res) => {
     }
 };
 
-// Subscribe to newsletter
+// ---------------------------
+// SUBSCRIBE TO NEWSLETTER
+// ---------------------------
 exports.subscribeToNewsletter = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(
             req.user.id,
-            { 
-                $set: { 
+            {
+                $set: {
                     'preferences.subscribeToNewsletter': true,
-                    'preferences.emailNotifications': true 
-                } 
+                    'preferences.emailNotifications': true
+                }
             },
             { new: true }
         );
 
         if (!user) return res.status(404).json({ message: 'User not found' });
-        
-        // Send welcome email
+
+        // Send welcome email via SendGrid transporter
         await sendEmail({
             to: user.email,
-            subject: 'Welcome to Our Newsletter!',
-            text: `Hi ${user.name},\n\nThank you for subscribing to our newsletter! You'll now receive the latest news and updates.\n\nBest regards,\nThe News Team`
+            subject: '🎉 Welcome to Our Newsletter!',
+            text: `Hi ${user.name || 'there'},\n\nThank you for subscribing to our newsletter! You'll now receive the latest news and updates.\n\nBest regards,\nThe News Team`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>🎉 Welcome to Our Newsletter!</h2>
+                    <p>Hi ${user.name || 'there'},</p>
+                    <p>Thank you for subscribing to our newsletter! You’ll now receive the latest news, updates, and curated articles from your favorite topics.</p>
+                    <p>Stay tuned for our next issue! 🚀</p>
+                    <p>Best regards,<br><strong>The News Team</strong></p>
+                </div>
+            `
         });
 
         res.json({ message: 'Successfully subscribed to newsletter', user });
@@ -136,7 +151,9 @@ exports.subscribeToNewsletter = async (req, res) => {
     }
 };
 
-// Unsubscribe from newsletter
+// ---------------------------
+// UNSUBSCRIBE FROM NEWSLETTER
+// ---------------------------
 exports.unsubscribeFromNewsletter = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(
@@ -153,7 +170,9 @@ exports.unsubscribeFromNewsletter = async (req, res) => {
     }
 };
 
-// Get all news (public)
+// ---------------------------
+// GET ALL NEWS (PUBLIC)
+// ---------------------------
 exports.getAllNews = async (req, res) => {
     try {
         const news = await News.find().sort({ createdAt: -1 });
@@ -164,13 +183,14 @@ exports.getAllNews = async (req, res) => {
     }
 };
 
-// Get news by topic (case-insensitive)
+// ---------------------------
+// GET NEWS BY TOPIC
+// ---------------------------
 exports.getNewsByTopic = async (req, res) => {
     try {
         const { topic } = req.params;
         if (!topic) return res.status(400).json({ message: 'Topic is required' });
 
-        // Use case-insensitive regex to match topic
         const news = await News.find({ topic: { $regex: `^${topic}$`, $options: 'i' } }).sort({ createdAt: -1 });
         res.json({ count: news.length, news });
     } catch (err) {
@@ -179,7 +199,9 @@ exports.getNewsByTopic = async (req, res) => {
     }
 };
 
-// Get single news by id
+// ---------------------------
+// GET SINGLE NEWS BY ID
+// ---------------------------
 exports.getNewsById = async (req, res) => {
     try {
         const { id } = req.params;
